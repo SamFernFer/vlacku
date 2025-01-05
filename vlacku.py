@@ -1,13 +1,33 @@
 import sys, os, re
 import xml.etree.ElementTree as ET
-from io import StringIO
 from typing import Pattern
 
 if len(sys.argv) != 2:
-    # Retrieves the file's name.
-    _name: str = os.path.basename(__file__)
     # Retrieves the escape character for the current system.
     _esc: str = '^' if os.name == "nt" else '\\'
+    # The characters which need escaping.
+    _chars = [ '&', '|', '!' ]
+
+    # Escape the characters which need escaping in the argument.
+    def escapeArg(arg: str):
+        return "".join(_esc + c if c in _chars else c for c in arg)
+    
+    _examples: list = [
+        (
+            [ "user/username=officialdata", "&", "type=gismu" ],
+            "Lists all official gismu (and experimental gismu, if any are official)"
+        ),
+        (
+            [ "glossword/word=^or$" ],
+            "Lists all words with one glossword which is exacly \"or\""
+        ),
+        # (
+        #     [ ],
+        #     'Lists all two-letter cmavo which end in "e" and do not begin with "d"'
+        # )
+    ]
+    # Retrieves the file's name.
+    _name: str = os.path.basename(__file__)
 
     print(f"Usage: {str} (--paths | expr)\n")
     print(
@@ -22,19 +42,6 @@ if len(sys.argv) != 2:
         '- & (binary): 2\n'
         '- | (binary): 3\n'
     )
-    print("Examples:\n")
-    print(
-        f"1: {_name} user/username=officialdata {_esc}& type=gismu\n"
-        "- Lists all official gismu (and experimental gismu, if any are official);\n"
-    )
-    print(
-        f'2: {_name} glossword/word=^or$\n'
-        "- Lists all words with one glossword which is exacly \"or\";\n"
-    )
-    print(
-        f'3: {_name} type=\n'
-        '- Lists all two-letter cmavo which end in "e" and do not begin with "d";\n'
-    
     exit(0)
 
 _dbPath: str = "jbovlaste-en.xml"
