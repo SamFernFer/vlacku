@@ -4,14 +4,37 @@ from io import StringIO
 from typing import Pattern
 
 if len(sys.argv) != 2:
-    print(f"Usage: {os.path.basename(__file__)} <path>=<pattern>")
-    print()
+    # Retrieves the file's name.
+    _name: str = os.path.basename(__file__)
+    # Retrieves the escape character for the current system.
+    _esc: str = '^' if os.name == "nt" else '\\'
+
+    print(f"Usage: {str} (--paths | expr)\n")
     print(
-        "<path> is a tag or attribute path (separated by '/' and without './' at the start) "
-        "inside each valsi. <pattern> is the Regex pattern which the tag's text must at least "
-        "partially match."
+        'expr is a boolean expression whose conditions are of the form "<path>=<pattern>". '
+        '<path> is a path to an XML node or attribute inside each valsi node, with "/" as the '
+        "separator. <pattern> is a regex pattern which must be present inside the node's text "
+        "or the attribute's value. Parentheses are supported. Conditions without operators in "
+        'between are treated as if they were joined by "&". The operators and their '
+        "precedences (a lower precedence means getting evaluated first) are the following "
+        "(note that on most shells they should be escaped):\n"
+        '- ! (unary): 1\n'
+        '- & (binary): 2\n'
+        '- | (binary): 3\n'
     )
-    print("Example: sisku.py user/username=officialdata")
+    print("Examples:\n")
+    print(
+        f"1: {_name} user/username=officialdata {_esc}& type=gismu\n"
+        "- Lists all official gismu (and experimental gismu, if any are official);\n"
+    )
+    print(
+        f'2: {_name} glossword/word=^or$\n'
+        "- Lists all words with one glossword which is exacly \"or\";\n"
+    )
+    print(
+        f'3: {_name} type=\n'
+        '- Lists all two-letter cmavo which end in "e" and do not begin with "d";\n'
+    
     exit(0)
 
 _dbPath: str = "jbovlaste-en.xml"
