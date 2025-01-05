@@ -2,7 +2,9 @@ import sys, os, re
 import xml.etree.ElementTree as ET
 from typing import Pattern
 
-if len(sys.argv) != 2:
+# Prints the help message.
+def getHelp(what: str):
+    if 
     # Retrieves the escape character for the current system.
     _esc: str = '^' if os.name == "nt" else '\\'
     # The characters which need escaping.
@@ -43,28 +45,48 @@ if len(sys.argv) != 2:
         '- | (binary): 3\n'
     )
     exit(0)
+if len(sys.argv) < 2:
+    getHelp(None)
 
-_dbPath: str = "jbovlaste-en.xml"
+_dbPath: str = "vlaste/jbovlaste-en.xml"
 
-_pair: str = sys.argv[1]
-_index: int = _pair.find('=')
+_expectedOptions = [
+    (    "help", "h",  [0, 1],
+        'Displays help information. Pass "operators" to view the list of operators '
+        'and "paths" to view the list of possible paths.'
+    ),
+    ( "version", "V",  0, "Displays the program's version." )
+]
 
-_path = _pair[:_index]
-_pattern = _pair[_index + 1:]
+_expectedLongOptions: dict = {}
+_expectedShortOptions: dict = {}
 
-_shouldExit: bool = False
-if len(_path) <= 0:
-    print("ERROR: empty path.")
-    _shouldExit = True
-if len(_pattern) <= 0:
-    print("ERROR: empty pattern.")
-    _shouldExit = True
+# Builds the dicts for the expected options.
+for e in _expectedOptions:
+    if e[0] is not None: _expectedLongOptions[e[0]] = e
+    if e[1] is not None: _expectedShortOptions[e[1]] = e
 
-if _shouldExit: exit(-1)
+_tokens: list = []
+_longOptions: list = []
+_shortOptions: list = []
 
-_regex: Pattern[str] = re.compile(_pattern)
+for i in range(1, len(sys.argv)):
+    _arg: str = sys.argv[i]
+    if _arg.startswith('--'):
+        if _expectedLongOptions.get(_arg[2:]) is not None:
+            _longOptions.append(
+        else:
+            f
+    elif _arg.startswith('-'):
+    else:
+        _tokens.append(_arg)
 
-def match(elem: ET.Element, path: str, pattern: Pattern[str])->bool:
+if "help" in _longOptions or "h" in _shortOptions:
+    getHelp()
+
+exit(0)
+
+def runMatch(elem: ET.Element, path: str, pattern: Pattern[str])->bool:
     _pos: int = path.find('/')
     # If the path has any subpath, then one of the indirect children must match.
     if _pos > 0:
@@ -104,5 +126,33 @@ with open(_dbPath, "rb") as _dbFile:
         exit(-1)
 
     for v in _list:
-        if match(v, _path, _regex):
+        if runMatch(v, _path, _regex):
             print(ET.tostring(v, encoding='utf-8').decode('utf-8'))
+
+def match(index: int, tokens: list)->tuple[str, Pattern[str]]:
+    _pair: str = tokens[index]
+    _index: int = _pair.find('=')
+
+    _path = _pair[:_index]
+    _pattern = _pair[_index + 1:]
+
+    if len(_path) <= 0:
+        raise Exception("ERROR: empty path.")
+    if len(_pattern) <= 0:
+        raise Exception("ERROR: empty pattern.")
+    return (_path, re.compile(_pattern))
+
+def expr0():
+
+
+# and ::= "&"
+# or  ::= "|"
+# not ::= "!"
+# match ::= name"="name
+
+# expr0 ::= match | "(" exprN ")"
+# expr1 ::= expr0 | not expr0
+# expr2 ::= expr1 | expr1 | expr1 and expr1
+# expr3 ::= expr2 | expr2 or expr2
+# exprN ::= expr3
+
